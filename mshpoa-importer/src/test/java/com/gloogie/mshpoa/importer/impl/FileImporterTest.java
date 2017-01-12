@@ -126,51 +126,185 @@ public class FileImporterTest
     @Test
     public void testConsumeFileWrongNumberOfTemperatureFields() throws Exception {
 
-        try {
-            fileImporter.consume(fileTKO);
-            Assert.fail("Expected exception was not thrown");
-        } catch (final ImporterException e) {
-            Assert.assertEquals(
-                "The line [T,C,] is not a valid line for the temperature measure. Expected number of fields was 3, actual number is 2",
-                e.getMessage());
-        }
+        final List<WeatherStation> stations = fileImporter.consume(fileTKO);
+
+        Assert.assertNotNull(stations);
+        Assert.assertEquals(4, stations.size());
+
+        // Check station Mont Aigoual
+        final WeatherStation station = stations.get(0);
+        Assert.assertNotNull(station);
+        Assert.assertEquals("Mont Aigoual", station.getName());
+        final List<Measure> measures = station.getMeasures();
+        Assert.assertNotNull(measures);
+        Assert.assertEquals(5, measures.size());
+        final List<FailedMeasure> failedMeasures = station.getFailedMeasures();
+        Assert.assertNotNull(failedMeasures);
+        Assert.assertEquals(1, failedMeasures.size());
+
+        // Check measures of station Mont Aigoual
+        Measure measure = measures.get(0);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Pressure);
+        final Pressure pressure = (Pressure) measure;
+        Assert.assertEquals("BAR", pressure.getUnit());
+        Assert.assertEquals(dateFormat.parse("2014-11-01"), pressure.getDate());
+        Assert.assertEquals(new Double(1014), pressure.getValue());
+
+        measure = measures.get(1);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Humidity);
+        final Humidity humidity = (Humidity) measure;
+        Assert.assertEquals(new Double(25), humidity.getValue());
+
+        measure = measures.get(2);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Temperature);
+        final Temperature temperature = (Temperature) measure;
+        Assert.assertEquals("C", temperature.getUnit());
+        Assert.assertEquals(new Double(21), temperature.getValue());
+
+        final FailedMeasure failedmeasure = failedMeasures.get(0);
+        Assert.assertNotNull(failedmeasure);
+        Assert.assertEquals("T,C,", failedmeasure.getValue());
     }
 
     @Test
     public void testConsumeFileWrongNumberOfPressureFields() throws Exception {
 
-        try {
-            fileImporter.consume(filePKO);
-            Assert.fail("Expected exception was not thrown");
-        } catch (final ImporterException e) {
-            Assert.assertEquals(
-                "The line [P,BAR,1014] is not a valid line for pressure measure. Expected number of fields was 4, actual number is 3",
-                e.getMessage());
-        }
+        final List<WeatherStation> stations = fileImporter.consume(filePKO);
+
+        Assert.assertNotNull(stations);
+        Assert.assertEquals(4, stations.size());
+
+        // Check station Mont Aigoual
+        final WeatherStation station = stations.get(0);
+        Assert.assertNotNull(station);
+        Assert.assertEquals("Mont Aigoual", station.getName());
+        final List<Measure> measures = station.getMeasures();
+        Assert.assertNotNull(measures);
+        Assert.assertEquals(5, measures.size());
+        final List<FailedMeasure> failedMeasures = station.getFailedMeasures();
+        Assert.assertNotNull(failedMeasures);
+        Assert.assertEquals(1, failedMeasures.size());
+
+        // Check measures of station Mont Aigoual
+        Measure measure = measures.get(0);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Temperature);
+        Temperature temperature = (Temperature) measure;
+        Assert.assertEquals("C", temperature.getUnit());
+        Assert.assertEquals(new Double(20.5), temperature.getValue());
+
+        measure = measures.get(1);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Humidity);
+        final Humidity humidity = (Humidity) measure;
+        Assert.assertEquals(new Double(25), humidity.getValue());
+
+        measure = measures.get(2);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Temperature);
+        temperature = (Temperature) measure;
+        Assert.assertEquals("C", temperature.getUnit());
+        Assert.assertEquals(new Double(21), temperature.getValue());
+
+        final FailedMeasure failedMeasure = failedMeasures.get(0);
+        Assert.assertNotNull(failedMeasure);
+        Assert.assertEquals("P,BAR,1014", failedMeasure.getValue());
     }
 
     @Test
     public void testConsumeFileWrongNumberOfHumidityFields() throws Exception {
 
-        try {
-            fileImporter.consume(fileHKO);
-            Assert.fail("Expected exception was not thrown");
-        } catch (final ImporterException e) {
-            Assert.assertEquals(
-                "The line [H,25,test] is not a valid line for humidity measure. Expected number of fields was 2, actual number is 3",
-                e.getMessage());
-        }
+        final List<WeatherStation> stations = fileImporter.consume(fileHKO);
+
+        Assert.assertNotNull(stations);
+        Assert.assertEquals(4, stations.size());
+
+        // Check station Mont Aigoual
+        final WeatherStation station = stations.get(0);
+        Assert.assertNotNull(station);
+        Assert.assertEquals("Mont Aigoual", station.getName());
+        final List<Measure> measures = station.getMeasures();
+        Assert.assertNotNull(measures);
+        Assert.assertEquals(5, measures.size());
+        final List<FailedMeasure> failedMeasures = station.getFailedMeasures();
+        Assert.assertNotNull(failedMeasures);
+        Assert.assertEquals(1, failedMeasures.size());
+
+        // Check measures of station Mont Aigoual
+        Measure measure = measures.get(0);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Temperature);
+        Temperature temperature = (Temperature) measure;
+        Assert.assertEquals("C", temperature.getUnit());
+        Assert.assertEquals(new Double(20.5), temperature.getValue());
+
+        measure = measures.get(1);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Pressure);
+        final Pressure pressure = (Pressure) measure;
+        Assert.assertEquals("BAR", pressure.getUnit());
+        Assert.assertEquals(dateFormat.parse("2014-11-01"), pressure.getDate());
+        Assert.assertEquals(new Double(1014), pressure.getValue());
+
+        measure = measures.get(2);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Temperature);
+        temperature = (Temperature) measure;
+        Assert.assertEquals("C", temperature.getUnit());
+        Assert.assertEquals(new Double(21), temperature.getValue());
+
+        final FailedMeasure failedMeasure = failedMeasures.get(0);
+        Assert.assertNotNull(failedMeasure);
+        Assert.assertEquals("H,25,test", failedMeasure.getValue());
     }
 
     @Test
     public void testConsumeFileUnknownMeasureType() throws Exception {
 
-        try {
-            fileImporter.consume(fileUnknownType);
-            Assert.fail("Expected exception was not thrown");
-        } catch (final ImporterException e) {
-            Assert.assertEquals("Unsupported measure type: Z", e.getMessage());
-        }
+        final List<WeatherStation> stations = fileImporter.consume(fileUnknownType);
+
+        Assert.assertNotNull(stations);
+        Assert.assertEquals(4, stations.size());
+
+        // Check station Mont Aigoual
+        final WeatherStation station = stations.get(0);
+        Assert.assertNotNull(station);
+        Assert.assertEquals("Mont Aigoual", station.getName());
+        final List<Measure> measures = station.getMeasures();
+        Assert.assertNotNull(measures);
+        Assert.assertEquals(5, measures.size());
+        final List<FailedMeasure> failedMeasures = station.getFailedMeasures();
+        Assert.assertNotNull(failedMeasures);
+        Assert.assertEquals(1, failedMeasures.size());
+
+        // Check measures of station Mont Aigoual
+        Measure measure = measures.get(0);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Pressure);
+        final Pressure pressure = (Pressure) measure;
+        Assert.assertEquals("BAR", pressure.getUnit());
+        Assert.assertEquals(dateFormat.parse("2014-11-01"), pressure.getDate());
+        Assert.assertEquals(new Double(1014), pressure.getValue());
+
+        measure = measures.get(1);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Humidity);
+        final Humidity humidity = (Humidity) measure;
+        Assert.assertEquals(new Double(25), humidity.getValue());
+
+        measure = measures.get(2);
+        Assert.assertNotNull(measure);
+        Assert.assertTrue(measure instanceof Temperature);
+        final Temperature temperature = (Temperature) measure;
+        Assert.assertEquals("C", temperature.getUnit());
+        Assert.assertEquals(new Double(21), temperature.getValue());
+
+        final FailedMeasure failedmeasure = failedMeasures.get(0);
+        Assert.assertNotNull(failedmeasure);
+        Assert.assertEquals("Z,C,20.5", failedmeasure.getValue());
     }
 
     @Test
@@ -180,7 +314,9 @@ public class FileImporterTest
             fileImporter.consume(fileNbLinesKO);
             Assert.fail("Expected exception was not thrown");
         } catch (final ImporterException e) {
-            Assert.assertEquals("Unsupported measure type: Clapiers", e.getMessage());
+            Assert.assertEquals(
+                "The line [P,BAR,2014-11-01,1001] is not a valid line for the station. Expected number of fields was 2, actual number is 4",
+                e.getMessage());
         }
     }
 }

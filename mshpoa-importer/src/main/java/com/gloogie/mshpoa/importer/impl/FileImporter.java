@@ -55,7 +55,7 @@ public class FileImporter implements Importer<File>
             final WeatherStation station = parseWeatherStation(lines, i);
             stations.add(station);
             // Skip all lines of measures of the current station to parse the next station
-            i += station.getMeasures().size();
+            i += station.getMeasures().size() + station.getFailedMeasures().size();
         }
         return stations;
     }
@@ -78,17 +78,29 @@ public class FileImporter implements Importer<File>
                                                  fields[0]);
             throw new ImporterException(message, e);
         }
-        final List<String> measuresLines = lines.subList(index + 1, index + nbMeasures + 1);
-        station.setMeasures(parseMeasuresOfStation(measuresLines));
+        final int start = index + 1;
+        final int end = Math.min(lines.size(), index + nbMeasures + 1);
+        final List<String> measuresLines = lines.subList(start, end);
+        parseAndAddMeasuresOfStation(station, measuresLines);
         return station;
     }
 
-    private List<Measure> parseMeasuresOfStation(final List<String> lines) throws ImporterException {
+    private void parseAndAddMeasuresOfStation(final WeatherStation station, final List<String> lines)
+        throws ImporterException {
         final List<Measure> measures = new ArrayList<>();
+        final List<FailedMeasure> failedMeasures = new ArrayList<>();
         for (final String line : lines) {
-            measures.add(parseMeasure(line));
+            try {
+                measures.add(parseMeasure(line));
+            } catch (final ImporterException e) {
+                // TODO log
+                final FailedMeasure failedMeasure = new FailedMeasure();
+                failedMeasure.setValue(line);
+                failedMeasures.add(failedMeasure);
+            }
         }
-        return measures;
+        station.setMeasures(measures);
+        station.setFailedMeasures(failedMeasures);
     }
 
     private Measure parseMeasure(final String line) throws ImporterException {

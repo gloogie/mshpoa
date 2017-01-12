@@ -9,6 +9,7 @@ public class WeatherStation
 {
     private String name;
     private List<Measure> measures;
+    private List<FailedMeasure> failedMeasures;
 
     public String getName() {
         return name;
@@ -24,5 +25,13 @@ public class WeatherStation
 
     public void setMeasures(final List<Measure> measures) {
         this.measures = measures;
+    }
+
+    public List<FailedMeasure> getFailedMeasures() {
+        return failedMeasures;
+    }
+
+    public void setFailedMeasures(final List<FailedMeasure> failedMeasures) {
+        this.failedMeasures = failedMeasures;
     }
 }
