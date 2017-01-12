@@ -1,0 +1,36 @@
+# Mont Aigoual
+Mont Aigoual,6
+T,C,20.5
+P,BAR,1014
+H,25,
+T,C,21
+P,BAR,2014-11-02,1014
+H,25
+
+# Calpiers
+Clapiers,9
+P,BAR,2014-11-02,1012
+T,C,24.3
+P,BAR,2014-11-01,1001
+T,C,22.2
+H,1
+P,BAR,2014-11-03,999
+H,5
+T,C,26.2
+H,8
+
+# Montpellier
+Montpellier,3
+T,C,100
+T,C,22.6
+T,C,19.9
+Paris,9
+P,BAR,2014-11-02,1012
+T,C,1
+P,BAR,2014-11-01,1001
+T,C,-50
+H,95
+P,BAR,2014-11-03,999
+H,85
+T,C,-1
+H,88
