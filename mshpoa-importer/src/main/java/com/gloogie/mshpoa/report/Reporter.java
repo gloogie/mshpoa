@@ -2,7 +2,6 @@ package com.gloogie.mshpoa.report;
 
 import com.gloogie.mshpoa.model.Measure;
 import com.gloogie.mshpoa.model.WeatherStation;
-import com.gloogie.mshpoa.report.exception.ReportException;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
@@ -18,15 +17,30 @@ public class Reporter
     private List<WeatherStation> stations = new ArrayList<>();
     private final Comparator<Measure> measureComparator = (m1, m2) -> Double.compare(m1.getValue(), m2.getValue());
 
+    /**
+     * Constructor for Reporter
+     *
+     * @param stations list of stations on which the results will be computed
+     */
     public Reporter(final List<WeatherStation> stations) {
         Validate.notNull(stations, "List of stations cannot be null");
         this.stations = stations;
     }
 
+    /**
+     * Compute the number of weather stations
+     *
+     * @return the number of weather stations
+     */
     public long getNumberOfWeatherStations() {
         return stations.size();
     }
 
+    /**
+     * Compute the number of failed measures
+     *
+     * @return the number of failed measures
+     */
     public long getNumberOfSensorsInError() {
         long result = 0;
         for (final WeatherStation station : stations) {
@@ -35,7 +49,13 @@ public class Reporter
         return result;
     }
 
-    public double getMinValue(final String type) throws ReportException {
+    /**
+     * Compute the minimum value for measures of the specified type
+     *
+     * @param type measure type
+     * @return the minimum value
+     */
+    public double getMinValue(final String type) {
 
         Validate.notBlank(type, "type cannot be blank");
 
@@ -53,7 +73,13 @@ public class Reporter
         return result;
     }
 
-    public double getMaxValue(final String type) throws ReportException {
+    /**
+     * Compute the maximum value for measures of the specified type
+     *
+     * @param type measure type
+     * @return the maximum value
+     */
+    public double getMaxValue(final String type) {
 
         Validate.notBlank(type, "type cannot be blank");
 
@@ -71,7 +97,13 @@ public class Reporter
         return result;
     }
 
-    public double getMeanValue(final String type) throws ReportException {
+    /**
+     * Compute the mean value for measures of the specified type
+     *
+     * @param type measure type
+     * @return the mean value
+     */
+    public double getMeanValue(final String type) {
 
         Validate.notBlank(type, "type cannot be blank");
 

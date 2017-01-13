@@ -21,5 +21,12 @@ public abstract class Importer<SourceType>
         this.measureTypes = measureTypes;
     }
 
+    /**
+     * Parse the specified source which contains measures of weather stations
+     *
+     * @param source source which contains the measures
+     * @return the list of weather stations parsed
+     * @throws ImporterException if an error occurred
+     */
     public abstract List<WeatherStation> consume(SourceType source) throws ImporterException;
 }

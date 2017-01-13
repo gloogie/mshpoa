@@ -32,10 +32,23 @@ public class FileImporter extends Importer<File>
     private final String fieldsSeparator;
     private final Map<String, List<MeasureField>> fieldsPerType;
 
+    /**
+     * Constructor for FileImporter
+     *
+     * @param measureTypes    the list of possible measure types
+     * @param prefixComment   the prefix for comments (lines starting with this prefix are ignored in the file)
+     * @param datePattern     date pattern uased to parse dates in measures lines
+     * @param fieldsSeparator separator used between each fields in measures lines
+     * @param fieldsPerType   list of measure fields per measure type
+     */
     public FileImporter(final List<MeasureType> measureTypes, final String prefixComment, final String datePattern,
                         final String fieldsSeparator, final Map<String, List<MeasureField>> fieldsPerType) {
 
-        Validate.notNull(measureTypes);
+        Validate.notNull(measureTypes, "List of measure types cannot be null");
+        Validate.notBlank(prefixComment, "Prefix comment cannot be blank");
+        Validate.notBlank(datePattern, "Date pattern cannot be blank");
+        Validate.notBlank(fieldsSeparator, "Fields separator cannot be blank");
+        Validate.notNull(fieldsPerType, "Fields per type cannot be null");
 
         setMeasureTypes(measureTypes);
         this.measureTypesPerCode = new LinkedHashMap<>();
