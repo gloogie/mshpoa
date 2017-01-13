@@ -24,26 +24,38 @@ public class ReporterTest
     public void setUp() throws Exception {
         stations = new ArrayList<>();
 
+        final MeasureType typeT = new MeasureType();
+        typeT.setCode("T");
+        typeT.setName("temperature");
+
+        final MeasureType typeP = new MeasureType();
+        typeP.setCode("P");
+        typeP.setName("pressure");
+
+        final MeasureType typeH = new MeasureType();
+        typeH.setCode("H");
+        typeH.setName("humidity");
+
         final WeatherStation station1 = new WeatherStation();
         station1.setName("station1");
         List<Measure> measures = new ArrayList<>();
         Measure measure = new Measure();
-        measure.setType(MeasureType.T);
+        measure.setType(typeT);
         measure.setUnit("C");
         measure.setValue(20.5);
         measures.add(measure);
         measure = new Measure();
-        measure.setType(MeasureType.P);
+        measure.setType(typeP);
         measure.setUnit("BAR");
         measure.setValue(1014.0);
         measures.add(measure);
         measure = new Measure();
-        measure.setType(MeasureType.P);
+        measure.setType(typeP);
         measure.setUnit("BAR");
         measure.setValue(1015.0);
         measures.add(measure);
         measure = new Measure();
-        measure.setType(MeasureType.H);
+        measure.setType(typeH);
         measure.setValue(50.0);
         measures.add(measure);
 
@@ -54,26 +66,26 @@ public class ReporterTest
         station2.setName("station2");
         measures = new ArrayList<>();
         measure = new Measure();
-        measure.setType(MeasureType.T);
+        measure.setType(typeT);
         measure.setUnit("C");
         measure.setValue(30.0);
         measures.add(measure);
         measure = new Measure();
-        measure.setType(MeasureType.T);
+        measure.setType(typeT);
         measure.setUnit("C");
         measure.setValue(35.0);
         measures.add(measure);
         measure = new Measure();
-        measure.setType(MeasureType.P);
+        measure.setType(typeP);
         measure.setUnit("BAR");
         measure.setValue(1010.0);
         measures.add(measure);
         measure = new Measure();
-        measure.setType(MeasureType.H);
+        measure.setType(typeH);
         measure.setValue(30.0);
         measures.add(measure);
         measure = new Measure();
-        measure.setType(MeasureType.H);
+        measure.setType(typeH);
         measure.setValue(70.0);
         measures.add(measure);
 
@@ -123,22 +135,22 @@ public class ReporterTest
 
     @Test
     public void testGetMinValue() throws Exception {
-        Assert.assertEquals(20.5, reporter.getMinValue(MeasureType.T), 0.001);
-        Assert.assertEquals(1010.0, reporter.getMinValue(MeasureType.P), 0.001);
-        Assert.assertEquals(30.0, reporter.getMinValue(MeasureType.H), 0.001);
+        Assert.assertEquals(20.5, reporter.getMinValue("T"), 0.001);
+        Assert.assertEquals(1010.0, reporter.getMinValue("P"), 0.001);
+        Assert.assertEquals(30.0, reporter.getMinValue("H"), 0.001);
     }
 
     @Test
     public void testGetMaxValue() throws Exception {
-        Assert.assertEquals(35.0, reporter.getMaxValue(MeasureType.T), 0.001);
-        Assert.assertEquals(1015.0, reporter.getMaxValue(MeasureType.P), 0.001);
-        Assert.assertEquals(70.0, reporter.getMaxValue(MeasureType.H), 0.001);
+        Assert.assertEquals(35.0, reporter.getMaxValue("T"), 0.001);
+        Assert.assertEquals(1015.0, reporter.getMaxValue("P"), 0.001);
+        Assert.assertEquals(70.0, reporter.getMaxValue("H"), 0.001);
     }
 
     @Test
     public void testGetMeanValue() throws Exception {
-        Assert.assertEquals(28.5, reporter.getMeanValue(MeasureType.T), 0.001);
-        Assert.assertEquals(1013.0, reporter.getMeanValue(MeasureType.P), 0.001);
-        Assert.assertEquals(50.0, reporter.getMeanValue(MeasureType.H), 0.001);
+        Assert.assertEquals(28.5, reporter.getMeanValue("T"), 0.001);
+        Assert.assertEquals(1013.0, reporter.getMeanValue("P"), 0.001);
+        Assert.assertEquals(50.0, reporter.getMeanValue("H"), 0.001);
     }
 }

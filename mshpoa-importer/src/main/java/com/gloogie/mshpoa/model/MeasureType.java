@@ -3,19 +3,24 @@ package com.gloogie.mshpoa.model;
 /**
  * Type of the sensor
  */
-public enum MeasureType
+public class MeasureType
 {
-    T("Temperature"),
-    P("Pressure"),
-    H("Humidity");
+    private String code;
+    private String name;
 
-    private final String name;
+    public String getCode() {
+        return code;
+    }
 
-    MeasureType(final String name) {
-        this.name = name;
+    public void setCode(final String code) {
+        this.code = code;
     }
 
     public String getName() {
         return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
     }
 }

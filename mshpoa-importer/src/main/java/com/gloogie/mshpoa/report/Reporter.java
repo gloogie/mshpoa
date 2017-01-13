@@ -1,7 +1,6 @@
 package com.gloogie.mshpoa.report;
 
 import com.gloogie.mshpoa.model.Measure;
-import com.gloogie.mshpoa.model.MeasureType;
 import com.gloogie.mshpoa.model.WeatherStation;
 import com.gloogie.mshpoa.report.exception.ReportException;
 import org.apache.commons.lang3.Validate;
@@ -36,12 +35,16 @@ public class Reporter
         return result;
     }
 
-    public double getMinValue(final MeasureType type) throws ReportException {
+    public double getMinValue(final String type) throws ReportException {
+
+        Validate.notBlank(type, "type cannot be blank");
+
         double result = Double.MAX_VALUE;
         for (final WeatherStation station : stations) {
             final Optional<Measure> min = station.getMeasures()
                                                  .stream()
-                                                 .filter(measure -> type.equals(measure.getType()))
+                                                 .filter(measure -> measure.getType() != null && type.equals(
+                                                     measure.getType().getCode()))
                                                  .min(measureComparator);
             if (min.isPresent() && min.get().getValue() < result) {
                 result = min.get().getValue();
@@ -50,12 +53,16 @@ public class Reporter
         return result;
     }
 
-    public double getMaxValue(final MeasureType type) throws ReportException {
+    public double getMaxValue(final String type) throws ReportException {
+
+        Validate.notBlank(type, "type cannot be blank");
+
         double result = Double.MIN_VALUE;
         for (final WeatherStation station : stations) {
             final Optional<Measure> max = station.getMeasures()
                                                  .stream()
-                                                 .filter(measure -> type.equals(measure.getType()))
+                                                 .filter(measure -> measure.getType() != null && type.equals(
+                                                     measure.getType().getCode()))
                                                  .max(measureComparator);
             if (max.isPresent() && max.get().getValue() > result) {
                 result = max.get().getValue();
@@ -64,17 +71,20 @@ public class Reporter
         return result;
     }
 
-    public double getMeanValue(final MeasureType type) throws ReportException {
+    public double getMeanValue(final String type) throws ReportException {
+
+        Validate.notBlank(type, "type cannot be blank");
+
         double sum = 0;
         int count = 0;
         for (final WeatherStation station : stations) {
             count += station.getMeasures()
                             .stream()
-                            .filter(measure -> type.equals(measure.getType()))
+                            .filter(measure -> measure.getType() != null && type.equals(measure.getType().getCode()))
                             .count();
             sum += station.getMeasures()
                           .stream()
-                          .filter(measure -> type.equals(measure.getType()))
+                          .filter(measure -> measure.getType() != null && type.equals(measure.getType().getCode()))
                           .mapToDouble(Measure::getValue).sum();
         }
         if (count > 0) {

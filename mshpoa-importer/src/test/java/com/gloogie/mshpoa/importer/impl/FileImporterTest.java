@@ -1,10 +1,7 @@
 package com.gloogie.mshpoa.importer.impl;
 
 import com.gloogie.mshpoa.importer.exception.ImporterException;
-import com.gloogie.mshpoa.model.FailedMeasure;
-import com.gloogie.mshpoa.model.Measure;
-import com.gloogie.mshpoa.model.MeasureType;
-import com.gloogie.mshpoa.model.WeatherStation;
+import com.gloogie.mshpoa.model.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,14 +10,21 @@ import org.junit.Test;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Test class for FileImporter
  */
 public class FileImporterTest
 {
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final String PREFIX_COMMENT = "#";
+    public static final String FIELDS_SEPARATOR = ",";
+    public static final String DATE_PATTERN = "yyyy-MM-dd";
+
+    private final DateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
 
     private final File fileOK = new File(FileImporter.class.getResource("/test_ok.txt").getPath());
     private final File fileEmpty = new File(FileImporter.class.getResource("/test_empty.txt").getPath());
@@ -30,11 +34,37 @@ public class FileImporterTest
     private final File fileUnknownType = new File(FileImporter.class.getResource("/test_unknown_type.txt").getPath());
     private final File fileNbLinesKO = new File(FileImporter.class.getResource("/test_nb_lines_ko.txt").getPath());
 
-    private final FileImporter fileImporter = new FileImporter();
+    private FileImporter fileImporter;
 
     @Before
     public void setUp() throws Exception {
-
+        final List<MeasureType> measureTypes = new ArrayList<>();
+        MeasureType measureType = new MeasureType();
+        measureType.setCode("T");
+        measureType.setName("temperature");
+        measureTypes.add(measureType);
+        measureType = new MeasureType();
+        measureType.setCode("P");
+        measureType.setName("pressure");
+        measureTypes.add(measureType);
+        measureType = new MeasureType();
+        measureType.setCode("H");
+        measureType.setName("humidity");
+        measureTypes.add(measureType);
+        final Map<String, List<MeasureField>> fieldsPerType = new LinkedHashMap<>();
+        List<MeasureField> measureFields = new ArrayList<>();
+        measureFields.add(MeasureField.UNIT);
+        measureFields.add(MeasureField.VALUE);
+        fieldsPerType.put("T", measureFields);
+        measureFields = new ArrayList<>();
+        measureFields.add(MeasureField.UNIT);
+        measureFields.add(MeasureField.DATE);
+        measureFields.add(MeasureField.VALUE);
+        fieldsPerType.put("P", measureFields);
+        measureFields = new ArrayList<>();
+        measureFields.add(MeasureField.VALUE);
+        fieldsPerType.put("H", measureFields);
+        fileImporter = new FileImporter(measureTypes, PREFIX_COMMENT, DATE_PATTERN, FIELDS_SEPARATOR, fieldsPerType);
     }
 
     @After
@@ -63,25 +93,30 @@ public class FileImporterTest
         // Check measures of station Mont Aigoual
         Measure measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertNotNull(measure.getType());
+        Assert.assertTrue("T".equals(measure.getType().getCode()));
+        Assert.assertTrue("temperature".equals(measure.getType().getName()));
         Assert.assertEquals("C", measure.getUnit());
         Assert.assertEquals(new Double(20.5), measure.getValue());
 
         measure = measures.get(1);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.P.equals(measure.getType()));
+        Assert.assertTrue("P".equals(measure.getType().getCode()));
+        Assert.assertTrue("pressure".equals(measure.getType().getName()));
         Assert.assertEquals("BAR", measure.getUnit());
         Assert.assertEquals(dateFormat.parse("2014-11-01"), measure.getDate());
         Assert.assertEquals(new Double(1014), measure.getValue());
 
         measure = measures.get(2);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.H.equals(measure.getType()));
+        Assert.assertTrue("H".equals(measure.getType().getCode()));
+        Assert.assertTrue("humidity".equals(measure.getType().getName()));
         Assert.assertEquals(new Double(25), measure.getValue());
 
         measure = measures.get(3);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertTrue("T".equals(measure.getType().getCode()));
+        Assert.assertTrue("temperature".equals(measure.getType().getName()));
         Assert.assertEquals("C", measure.getUnit());
         Assert.assertEquals(new Double(21), measure.getValue());
 
@@ -98,7 +133,8 @@ public class FileImporterTest
         // Check measures of station Clapiers
         measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.P.equals(measure.getType()));
+        Assert.assertTrue("P".equals(measure.getType().getCode()));
+        Assert.assertTrue("pressure".equals(measure.getType().getName()));
         Assert.assertEquals("BAR", measure.getUnit());
         Assert.assertEquals(dateFormat.parse("2014-11-02"), measure.getDate());
         Assert.assertEquals(new Double(1012), measure.getValue());
@@ -113,6 +149,16 @@ public class FileImporterTest
             Assert.fail("Expected exception was not thrown");
         } catch (final ImporterException e) {
             Assert.assertEquals("File cannot be null", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testConsumeFileNotNound() throws Exception {
+        try {
+            fileImporter.consume(new File("notExistPath"));
+            Assert.fail("Expected exception was not thrown");
+        } catch (final ImporterException e) {
+            Assert.assertEquals("File [notExistPath] is not found", e.getMessage());
         }
     }
 
@@ -146,19 +192,22 @@ public class FileImporterTest
         // Check measures of station Mont Aigoual
         Measure measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.P.equals(measure.getType()));
+        Assert.assertTrue("P".equals(measure.getType().getCode()));
+        Assert.assertTrue("pressure".equals(measure.getType().getName()));
         Assert.assertEquals("BAR", measure.getUnit());
         Assert.assertEquals(dateFormat.parse("2014-11-01"), measure.getDate());
         Assert.assertEquals(new Double(1014), measure.getValue());
 
         measure = measures.get(1);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.H.equals(measure.getType()));
+        Assert.assertTrue("H".equals(measure.getType().getCode()));
+        Assert.assertTrue("humidity".equals(measure.getType().getName()));
         Assert.assertEquals(new Double(25), measure.getValue());
 
         measure = measures.get(2);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertTrue("T".equals(measure.getType().getCode()));
+        Assert.assertTrue("temperature".equals(measure.getType().getName()));
         Assert.assertEquals("C", measure.getUnit());
         Assert.assertEquals(new Double(21), measure.getValue());
 
@@ -166,7 +215,7 @@ public class FileImporterTest
         Assert.assertNotNull(failedMeasure);
         Assert.assertNotNull(failedMeasure.getException());
         Assert.assertEquals(
-            "The line [T,C,] is not a valid line for the temperature measure. Expected number of fields was 3, actual number is 2",
+            "The line [T,C,] is not a valid line for the measure of type temperature. Expected number of fields was 3, actual number is 2",
             failedMeasure.getException().getMessage());
         Assert.assertEquals("T,C,", failedMeasure.getValue());
     }
@@ -193,18 +242,21 @@ public class FileImporterTest
         // Check measures of station Mont Aigoual
         Measure measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertTrue("T".equals(measure.getType().getCode()));
+        Assert.assertTrue("temperature".equals(measure.getType().getName()));
         Assert.assertEquals("C", measure.getUnit());
         Assert.assertEquals(new Double(20.5), measure.getValue());
 
         measure = measures.get(1);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.H.equals(measure.getType()));
+        Assert.assertTrue("H".equals(measure.getType().getCode()));
+        Assert.assertTrue("humidity".equals(measure.getType().getName()));
         Assert.assertEquals(new Double(25), measure.getValue());
 
         measure = measures.get(2);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertTrue("T".equals(measure.getType().getCode()));
+        Assert.assertTrue("temperature".equals(measure.getType().getName()));
         Assert.assertEquals("C", measure.getUnit());
         Assert.assertEquals(new Double(21), measure.getValue());
 
@@ -212,7 +264,7 @@ public class FileImporterTest
         Assert.assertNotNull(failedMeasure);
         Assert.assertNotNull(failedMeasure.getException());
         Assert.assertEquals(
-            "The line [P,BAR,1014] is not a valid line for pressure measure. Expected number of fields was 4, actual number is 3",
+            "The line [P,BAR,1014] is not a valid line for the measure of type pressure. Expected number of fields was 4, actual number is 3",
             failedMeasure.getException().getMessage());
         Assert.assertEquals("P,BAR,1014", failedMeasure.getValue());
     }
@@ -239,20 +291,23 @@ public class FileImporterTest
         // Check measures of station Mont Aigoual
         Measure measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertTrue("T".equals(measure.getType().getCode()));
+        Assert.assertTrue("temperature".equals(measure.getType().getName()));
         Assert.assertEquals("C", measure.getUnit());
         Assert.assertEquals(new Double(20.5), measure.getValue());
 
         measure = measures.get(1);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.P.equals(measure.getType()));
+        Assert.assertTrue("P".equals(measure.getType().getCode()));
+        Assert.assertTrue("pressure".equals(measure.getType().getName()));
         Assert.assertEquals("BAR", measure.getUnit());
         Assert.assertEquals(dateFormat.parse("2014-11-01"), measure.getDate());
         Assert.assertEquals(new Double(1014), measure.getValue());
 
         measure = measures.get(2);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertTrue("T".equals(measure.getType().getCode()));
+        Assert.assertTrue("temperature".equals(measure.getType().getName()));
         Assert.assertEquals("C", measure.getUnit());
         Assert.assertEquals(new Double(21), measure.getValue());
 
@@ -261,7 +316,7 @@ public class FileImporterTest
         Assert.assertNotNull(failedMeasure);
         Assert.assertNotNull(failedMeasure.getException());
         Assert.assertEquals(
-            "The line [H,25,test] is not a valid line for humidity measure. Expected number of fields was 2, actual number is 3",
+            "The line [H,25,test] is not a valid line for the measure of type humidity. Expected number of fields was 2, actual number is 3",
             failedMeasure.getException().getMessage());
         Assert.assertEquals("H,25,test", failedMeasure.getValue());
     }
@@ -288,19 +343,22 @@ public class FileImporterTest
         // Check measures of station Mont Aigoual
         Measure measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.P.equals(measure.getType()));
+        Assert.assertTrue("P".equals(measure.getType().getCode()));
+        Assert.assertTrue("pressure".equals(measure.getType().getName()));
         Assert.assertEquals("BAR", measure.getUnit());
         Assert.assertEquals(dateFormat.parse("2014-11-01"), measure.getDate());
         Assert.assertEquals(new Double(1014), measure.getValue());
 
         measure = measures.get(1);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.H.equals(measure.getType()));
+        Assert.assertTrue("H".equals(measure.getType().getCode()));
+        Assert.assertTrue("humidity".equals(measure.getType().getName()));
         Assert.assertEquals(new Double(25), measure.getValue());
 
         measure = measures.get(2);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertTrue("T".equals(measure.getType().getCode()));
+        Assert.assertTrue("temperature".equals(measure.getType().getName()));
         Assert.assertEquals("C", measure.getUnit());
         Assert.assertEquals(new Double(21), measure.getValue());
 

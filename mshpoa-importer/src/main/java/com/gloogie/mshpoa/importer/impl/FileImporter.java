@@ -2,11 +2,9 @@ package com.gloogie.mshpoa.importer.impl;
 
 import com.gloogie.mshpoa.importer.Importer;
 import com.gloogie.mshpoa.importer.exception.ImporterException;
-import com.gloogie.mshpoa.model.FailedMeasure;
-import com.gloogie.mshpoa.model.Measure;
-import com.gloogie.mshpoa.model.MeasureType;
-import com.gloogie.mshpoa.model.WeatherStation;
+import com.gloogie.mshpoa.model.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,26 +13,47 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Implementation class of Importer for files
  */
-public class FileImporter implements Importer<File>
+public class FileImporter extends Importer<File>
 {
-    public static final String PREFIX_COMMENT = "#";
     public static final int NUMBER_FIELDS_OF_LINE_FOR_WEATHER_STATION = 2;
-    public static final int NUMBER_FIELDS_OF_LINE_FOR_TEMPERATURE_MEASURE = 3;
-    public static final int NUMBER_FIELDS_OF_LINE_FOR_PRESSURE_MEASURE = 4;
-    public static final int NUMBER_FIELDS_OF_LINE_FOR_HUMIDITY_MEASURE = 2;
-    public static final String FIELDS_SEPARATOR = ",";
-    public static final String DATE_PATTERN = "yyyy-MM-dd";
 
-    private final DateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
+    private final String datePattern;
+    private final DateFormat dateFormat;
+
+    private final Map<String, MeasureType> measureTypesPerCode;
+    private final String prefixComment;
+    private final String fieldsSeparator;
+    private final Map<String, List<MeasureField>> fieldsPerType;
+
+    public FileImporter(final List<MeasureType> measureTypes, final String prefixComment, final String datePattern,
+                        final String fieldsSeparator, final Map<String, List<MeasureField>> fieldsPerType) {
+
+        Validate.notNull(measureTypes);
+
+        setMeasureTypes(measureTypes);
+        this.measureTypesPerCode = new LinkedHashMap<>();
+
+        // Check that fieldsPerType contains all provided measure types and build the map of measure types indexed by code
+        for (final MeasureType type : measureTypes) {
+            if (!fieldsPerType.containsKey(type.getCode())) {
+                throw new IllegalArgumentException("fieldsPerType does not contain the key [" + type.getCode() + "]");
+            }
+            this.measureTypesPerCode.put(type.getCode(), type);
+        }
+
+        this.prefixComment = prefixComment;
+        this.datePattern = datePattern;
+        this.dateFormat = new SimpleDateFormat(datePattern);
+        this.fieldsSeparator = fieldsSeparator;
+        this.fieldsPerType = fieldsPerType;
+    }
 
     @Override
     public List<WeatherStation> consume(final File file) throws ImporterException {
@@ -43,11 +62,15 @@ public class FileImporter implements Importer<File>
             throw new ImporterException("File cannot be null");
         }
 
+        if (!file.exists()) {
+            throw new ImporterException(String.format("File [%s] is not found", file.getPath()));
+        }
+
         final List<WeatherStation> stations = new ArrayList<>();
         final List<String> lines;
         try (Stream<String> stream = Files.lines(Paths.get(file.getPath()))) {
 
-            lines = stream.filter(line -> StringUtils.isNotBlank(line) && !line.startsWith(PREFIX_COMMENT))
+            lines = stream.filter(line -> StringUtils.isNotBlank(line) && !line.startsWith(prefixComment))
                           .collect(Collectors.toList());
 
         } catch (final IOException e) {
@@ -65,7 +88,7 @@ public class FileImporter implements Importer<File>
 
     private WeatherStation parseWeatherStation(final List<String> lines, final int index) throws ImporterException {
         final WeatherStation station = new WeatherStation();
-        final String[] fields = lines.get(index).split(FIELDS_SEPARATOR);
+        final String[] fields = lines.get(index).split(fieldsSeparator);
         if (fields.length != NUMBER_FIELDS_OF_LINE_FOR_WEATHER_STATION) {
             final String message = String.format(
                 "The line [%s] is not a valid line for the station. Expected number of fields was %d, actual number is %d",
@@ -107,72 +130,45 @@ public class FileImporter implements Importer<File>
     }
 
     private Measure parseMeasure(final String line) throws ImporterException {
-        final String[] fields = line.split(FIELDS_SEPARATOR);
+        final String[] fieldsValues = line.split(fieldsSeparator);
 
-        final String typeField = fields[0].trim();
-        final MeasureType type;
-        try {
-            type = MeasureType.valueOf(typeField);
-        } catch (final IllegalArgumentException e) {
+        final String typeField = fieldsValues[0].trim();
+        final MeasureType type = measureTypesPerCode.get(typeField);
+
+        if (type == null) {
             throw new ImporterException(String.format("Unsupported measure type: %s", typeField));
         }
-        switch (type) {
-            case T: {
-                return parseTemperatureMeasure(line, fields);
-            }
-            case P: {
-                return parsePressureMeasure(line, fields);
-            }
-            case H: {
-                return parseHumidityMeasure(line, fields);
-            }
-            default: {
-                throw new ImporterException(String.format("Unsupported measure type: %s", type.getName()));
-            }
-        }
-    }
 
-    private Measure parseTemperatureMeasure(final String line, final String[] fields) throws ImporterException {
+        final List<MeasureField> fields = fieldsPerType.get(type.getCode());
+
         final Measure measure = new Measure();
-        if (fields.length != NUMBER_FIELDS_OF_LINE_FOR_TEMPERATURE_MEASURE) {
+        if (fieldsValues.length != fields.size() + 1) {
             final String message = String.format(
-                "The line [%s] is not a valid line for the temperature measure. Expected number of fields was %d, actual number is %d",
-                line, NUMBER_FIELDS_OF_LINE_FOR_TEMPERATURE_MEASURE, fields.length);
+                "The line [%s] is not a valid line for the measure of type %s. Expected number of fields was %d, actual number is %d",
+                line, type.getName(), fields.size() + 1, fieldsValues.length);
             throw new ImporterException(message);
         }
-        measure.setType(MeasureType.T);
-        measure.setUnit(fields[1]);
-        measure.setValue(parseValue(fields[2], line));
+        measure.setType(type);
 
-        return measure;
-    }
-
-    private Measure parsePressureMeasure(final String line, final String[] fields) throws ImporterException {
-        final Measure measure = new Measure();
-        if (fields.length != NUMBER_FIELDS_OF_LINE_FOR_PRESSURE_MEASURE) {
-            final String message = String.format(
-                "The line [%s] is not a valid line for pressure measure. Expected number of fields was %d, actual number is %d",
-                line, NUMBER_FIELDS_OF_LINE_FOR_PRESSURE_MEASURE, fields.length);
-            throw new ImporterException(message);
+        // Fill each configured field on the measure
+        int i = 1;
+        for (final MeasureField field : fields) {
+            switch (field) {
+                case VALUE: {
+                    measure.setValue(parseValue(fieldsValues[i], line));
+                    break;
+                }
+                case UNIT: {
+                    measure.setUnit(fieldsValues[i]);
+                    break;
+                }
+                case DATE: {
+                    measure.setDate(parseDate(fieldsValues[i], line));
+                    break;
+                }
+            }
+            i++;
         }
-        measure.setType(MeasureType.P);
-        measure.setUnit(fields[1]);
-        measure.setDate(parseDate(fields[2], line));
-        measure.setValue(parseValue(fields[3], line));
-
-        return measure;
-    }
-
-    private Measure parseHumidityMeasure(final String line, final String[] fields) throws ImporterException {
-        final Measure measure = new Measure();
-        if (fields.length != NUMBER_FIELDS_OF_LINE_FOR_HUMIDITY_MEASURE) {
-            final String message = String.format(
-                "The line [%s] is not a valid line for humidity measure. Expected number of fields was %d, actual number is %d",
-                line, NUMBER_FIELDS_OF_LINE_FOR_HUMIDITY_MEASURE, fields.length);
-            throw new ImporterException(message);
-        }
-        measure.setType(MeasureType.H);
-        measure.setValue(parseValue(fields[1], line));
 
         return measure;
     }
@@ -203,7 +199,7 @@ public class FileImporter implements Importer<File>
         } catch (final ParseException e) {
             final String message = String.format(
                 "Date of measure [%s] in the line [%s] is not a valid date (Expected format is %s)", field,
-                line, DATE_PATTERN);
+                line, datePattern);
             throw new ImporterException(message, e);
         }
     }
