@@ -1,7 +1,10 @@
 package com.gloogie.mshpoa.importer.impl;
 
 import com.gloogie.mshpoa.importer.exception.ImporterException;
-import com.gloogie.mshpoa.model.*;
+import com.gloogie.mshpoa.model.FailedMeasure;
+import com.gloogie.mshpoa.model.Measure;
+import com.gloogie.mshpoa.model.MeasureType;
+import com.gloogie.mshpoa.model.WeatherStation;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -159,9 +162,13 @@ public class FileImporterTest
         Assert.assertEquals("C", measure.getUnit());
         Assert.assertEquals(new Double(21), measure.getValue());
 
-        final FailedMeasure failedmeasure = failedMeasures.get(0);
-        Assert.assertNotNull(failedmeasure);
-        Assert.assertEquals("T,C,", failedmeasure.getValue());
+        final FailedMeasure failedMeasure = failedMeasures.get(0);
+        Assert.assertNotNull(failedMeasure);
+        Assert.assertNotNull(failedMeasure.getException());
+        Assert.assertEquals(
+            "The line [T,C,] is not a valid line for the temperature measure. Expected number of fields was 3, actual number is 2",
+            failedMeasure.getException().getMessage());
+        Assert.assertEquals("T,C,", failedMeasure.getValue());
     }
 
     @Test
@@ -203,6 +210,10 @@ public class FileImporterTest
 
         final FailedMeasure failedMeasure = failedMeasures.get(0);
         Assert.assertNotNull(failedMeasure);
+        Assert.assertNotNull(failedMeasure.getException());
+        Assert.assertEquals(
+            "The line [P,BAR,1014] is not a valid line for pressure measure. Expected number of fields was 4, actual number is 3",
+            failedMeasure.getException().getMessage());
         Assert.assertEquals("P,BAR,1014", failedMeasure.getValue());
     }
 
@@ -247,6 +258,11 @@ public class FileImporterTest
 
         final FailedMeasure failedMeasure = failedMeasures.get(0);
         Assert.assertNotNull(failedMeasure);
+        Assert.assertNotNull(failedMeasure);
+        Assert.assertNotNull(failedMeasure.getException());
+        Assert.assertEquals(
+            "The line [H,25,test] is not a valid line for humidity measure. Expected number of fields was 2, actual number is 3",
+            failedMeasure.getException().getMessage());
         Assert.assertEquals("H,25,test", failedMeasure.getValue());
     }
 
@@ -288,9 +304,11 @@ public class FileImporterTest
         Assert.assertEquals("C", measure.getUnit());
         Assert.assertEquals(new Double(21), measure.getValue());
 
-        final FailedMeasure failedmeasure = failedMeasures.get(0);
-        Assert.assertNotNull(failedmeasure);
-        Assert.assertEquals("Z,C,20.5", failedmeasure.getValue());
+        final FailedMeasure failedMeasure = failedMeasures.get(0);
+        Assert.assertNotNull(failedMeasure);
+        Assert.assertNotNull(failedMeasure.getException());
+        Assert.assertEquals("Unsupported measure type: Z", failedMeasure.getException().getMessage());
+        Assert.assertEquals("Z,C,20.5", failedMeasure.getValue());
     }
 
     @Test

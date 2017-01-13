@@ -96,8 +96,8 @@ public class FileImporter implements Importer<File>
             try {
                 measures.add(parseMeasure(line));
             } catch (final ImporterException e) {
-                // TODO log
                 final FailedMeasure failedMeasure = new FailedMeasure();
+                failedMeasure.setException(e);
                 failedMeasure.setValue(line);
                 failedMeasures.add(failedMeasure);
             }
