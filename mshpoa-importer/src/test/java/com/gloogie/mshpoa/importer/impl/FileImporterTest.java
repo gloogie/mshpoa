@@ -53,35 +53,34 @@ public class FileImporterTest
         List<Measure> measures = station.getMeasures();
         Assert.assertNotNull(measures);
         Assert.assertEquals(6, measures.size());
+        final List<FailedMeasure> failedMeasures = station.getFailedMeasures();
+        Assert.assertNotNull(failedMeasures);
+        Assert.assertEquals(0, failedMeasures.size());
 
         // Check measures of station Mont Aigoual
         Measure measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Temperature);
-        Temperature temperature = (Temperature) measure;
-        Assert.assertEquals("C", temperature.getUnit());
-        Assert.assertEquals(new Double(20.5), temperature.getValue());
+        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertEquals("C", measure.getUnit());
+        Assert.assertEquals(new Double(20.5), measure.getValue());
 
         measure = measures.get(1);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Pressure);
-        Pressure pressure = (Pressure) measure;
-        Assert.assertEquals("BAR", pressure.getUnit());
-        Assert.assertEquals(dateFormat.parse("2014-11-01"), pressure.getDate());
-        Assert.assertEquals(new Double(1014), pressure.getValue());
+        Assert.assertTrue(MeasureType.P.equals(measure.getType()));
+        Assert.assertEquals("BAR", measure.getUnit());
+        Assert.assertEquals(dateFormat.parse("2014-11-01"), measure.getDate());
+        Assert.assertEquals(new Double(1014), measure.getValue());
 
         measure = measures.get(2);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Humidity);
-        final Humidity humidity = (Humidity) measure;
-        Assert.assertEquals(new Double(25), humidity.getValue());
+        Assert.assertTrue(MeasureType.H.equals(measure.getType()));
+        Assert.assertEquals(new Double(25), measure.getValue());
 
         measure = measures.get(3);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Temperature);
-        temperature = (Temperature) measure;
-        Assert.assertEquals("C", temperature.getUnit());
-        Assert.assertEquals(new Double(21), temperature.getValue());
+        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertEquals("C", measure.getUnit());
+        Assert.assertEquals(new Double(21), measure.getValue());
 
         /** To be continued... **/
 
@@ -96,11 +95,10 @@ public class FileImporterTest
         // Check measures of station Clapiers
         measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Pressure);
-        pressure = (Pressure) measure;
-        Assert.assertEquals("BAR", pressure.getUnit());
-        Assert.assertEquals(dateFormat.parse("2014-11-02"), pressure.getDate());
-        Assert.assertEquals(new Double(1012), pressure.getValue());
+        Assert.assertTrue(MeasureType.P.equals(measure.getType()));
+        Assert.assertEquals("BAR", measure.getUnit());
+        Assert.assertEquals(dateFormat.parse("2014-11-02"), measure.getDate());
+        Assert.assertEquals(new Double(1012), measure.getValue());
 
         /** To be continued... **/
     }
@@ -145,24 +143,21 @@ public class FileImporterTest
         // Check measures of station Mont Aigoual
         Measure measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Pressure);
-        final Pressure pressure = (Pressure) measure;
-        Assert.assertEquals("BAR", pressure.getUnit());
-        Assert.assertEquals(dateFormat.parse("2014-11-01"), pressure.getDate());
-        Assert.assertEquals(new Double(1014), pressure.getValue());
+        Assert.assertTrue(MeasureType.P.equals(measure.getType()));
+        Assert.assertEquals("BAR", measure.getUnit());
+        Assert.assertEquals(dateFormat.parse("2014-11-01"), measure.getDate());
+        Assert.assertEquals(new Double(1014), measure.getValue());
 
         measure = measures.get(1);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Humidity);
-        final Humidity humidity = (Humidity) measure;
-        Assert.assertEquals(new Double(25), humidity.getValue());
+        Assert.assertTrue(MeasureType.H.equals(measure.getType()));
+        Assert.assertEquals(new Double(25), measure.getValue());
 
         measure = measures.get(2);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Temperature);
-        final Temperature temperature = (Temperature) measure;
-        Assert.assertEquals("C", temperature.getUnit());
-        Assert.assertEquals(new Double(21), temperature.getValue());
+        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertEquals("C", measure.getUnit());
+        Assert.assertEquals(new Double(21), measure.getValue());
 
         final FailedMeasure failedmeasure = failedMeasures.get(0);
         Assert.assertNotNull(failedmeasure);
@@ -191,23 +186,20 @@ public class FileImporterTest
         // Check measures of station Mont Aigoual
         Measure measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Temperature);
-        Temperature temperature = (Temperature) measure;
-        Assert.assertEquals("C", temperature.getUnit());
-        Assert.assertEquals(new Double(20.5), temperature.getValue());
+        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertEquals("C", measure.getUnit());
+        Assert.assertEquals(new Double(20.5), measure.getValue());
 
         measure = measures.get(1);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Humidity);
-        final Humidity humidity = (Humidity) measure;
-        Assert.assertEquals(new Double(25), humidity.getValue());
+        Assert.assertTrue(MeasureType.H.equals(measure.getType()));
+        Assert.assertEquals(new Double(25), measure.getValue());
 
         measure = measures.get(2);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Temperature);
-        temperature = (Temperature) measure;
-        Assert.assertEquals("C", temperature.getUnit());
-        Assert.assertEquals(new Double(21), temperature.getValue());
+        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertEquals("C", measure.getUnit());
+        Assert.assertEquals(new Double(21), measure.getValue());
 
         final FailedMeasure failedMeasure = failedMeasures.get(0);
         Assert.assertNotNull(failedMeasure);
@@ -236,25 +228,22 @@ public class FileImporterTest
         // Check measures of station Mont Aigoual
         Measure measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Temperature);
-        Temperature temperature = (Temperature) measure;
-        Assert.assertEquals("C", temperature.getUnit());
-        Assert.assertEquals(new Double(20.5), temperature.getValue());
+        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertEquals("C", measure.getUnit());
+        Assert.assertEquals(new Double(20.5), measure.getValue());
 
         measure = measures.get(1);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Pressure);
-        final Pressure pressure = (Pressure) measure;
-        Assert.assertEquals("BAR", pressure.getUnit());
-        Assert.assertEquals(dateFormat.parse("2014-11-01"), pressure.getDate());
-        Assert.assertEquals(new Double(1014), pressure.getValue());
+        Assert.assertTrue(MeasureType.P.equals(measure.getType()));
+        Assert.assertEquals("BAR", measure.getUnit());
+        Assert.assertEquals(dateFormat.parse("2014-11-01"), measure.getDate());
+        Assert.assertEquals(new Double(1014), measure.getValue());
 
         measure = measures.get(2);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Temperature);
-        temperature = (Temperature) measure;
-        Assert.assertEquals("C", temperature.getUnit());
-        Assert.assertEquals(new Double(21), temperature.getValue());
+        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertEquals("C", measure.getUnit());
+        Assert.assertEquals(new Double(21), measure.getValue());
 
         final FailedMeasure failedMeasure = failedMeasures.get(0);
         Assert.assertNotNull(failedMeasure);
@@ -283,24 +272,21 @@ public class FileImporterTest
         // Check measures of station Mont Aigoual
         Measure measure = measures.get(0);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Pressure);
-        final Pressure pressure = (Pressure) measure;
-        Assert.assertEquals("BAR", pressure.getUnit());
-        Assert.assertEquals(dateFormat.parse("2014-11-01"), pressure.getDate());
-        Assert.assertEquals(new Double(1014), pressure.getValue());
+        Assert.assertTrue(MeasureType.P.equals(measure.getType()));
+        Assert.assertEquals("BAR", measure.getUnit());
+        Assert.assertEquals(dateFormat.parse("2014-11-01"), measure.getDate());
+        Assert.assertEquals(new Double(1014), measure.getValue());
 
         measure = measures.get(1);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Humidity);
-        final Humidity humidity = (Humidity) measure;
-        Assert.assertEquals(new Double(25), humidity.getValue());
+        Assert.assertTrue(MeasureType.H.equals(measure.getType()));
+        Assert.assertEquals(new Double(25), measure.getValue());
 
         measure = measures.get(2);
         Assert.assertNotNull(measure);
-        Assert.assertTrue(measure instanceof Temperature);
-        final Temperature temperature = (Temperature) measure;
-        Assert.assertEquals("C", temperature.getUnit());
-        Assert.assertEquals(new Double(21), temperature.getValue());
+        Assert.assertTrue(MeasureType.T.equals(measure.getType()));
+        Assert.assertEquals("C", measure.getUnit());
+        Assert.assertEquals(new Double(21), measure.getValue());
 
         final FailedMeasure failedmeasure = failedMeasures.get(0);
         Assert.assertNotNull(failedmeasure);

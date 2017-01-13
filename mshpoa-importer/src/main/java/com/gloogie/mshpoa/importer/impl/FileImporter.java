@@ -2,7 +2,10 @@ package com.gloogie.mshpoa.importer.impl;
 
 import com.gloogie.mshpoa.importer.Importer;
 import com.gloogie.mshpoa.importer.exception.ImporterException;
-import com.gloogie.mshpoa.model.*;
+import com.gloogie.mshpoa.model.FailedMeasure;
+import com.gloogie.mshpoa.model.Measure;
+import com.gloogie.mshpoa.model.MeasureType;
+import com.gloogie.mshpoa.model.WeatherStation;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -130,45 +133,48 @@ public class FileImporter implements Importer<File>
     }
 
     private Measure parseTemperatureMeasure(final String line, final String[] fields) throws ImporterException {
-        final Temperature temperature = new Temperature();
+        final Measure measure = new Measure();
         if (fields.length != NUMBER_FIELDS_OF_LINE_FOR_TEMPERATURE_MEASURE) {
             final String message = String.format(
                 "The line [%s] is not a valid line for the temperature measure. Expected number of fields was %d, actual number is %d",
                 line, NUMBER_FIELDS_OF_LINE_FOR_TEMPERATURE_MEASURE, fields.length);
             throw new ImporterException(message);
         }
-        temperature.setUnit(fields[1]);
-        temperature.setValue(parseValue(fields[2], line));
+        measure.setType(MeasureType.T);
+        measure.setUnit(fields[1]);
+        measure.setValue(parseValue(fields[2], line));
 
-        return temperature;
+        return measure;
     }
 
     private Measure parsePressureMeasure(final String line, final String[] fields) throws ImporterException {
-        final Pressure pressure = new Pressure();
+        final Measure measure = new Measure();
         if (fields.length != NUMBER_FIELDS_OF_LINE_FOR_PRESSURE_MEASURE) {
             final String message = String.format(
                 "The line [%s] is not a valid line for pressure measure. Expected number of fields was %d, actual number is %d",
                 line, NUMBER_FIELDS_OF_LINE_FOR_PRESSURE_MEASURE, fields.length);
             throw new ImporterException(message);
         }
-        pressure.setUnit(fields[1]);
-        pressure.setDate(parseDate(fields[2], line));
-        pressure.setValue(parseValue(fields[3], line));
+        measure.setType(MeasureType.P);
+        measure.setUnit(fields[1]);
+        measure.setDate(parseDate(fields[2], line));
+        measure.setValue(parseValue(fields[3], line));
 
-        return pressure;
+        return measure;
     }
 
     private Measure parseHumidityMeasure(final String line, final String[] fields) throws ImporterException {
-        final Humidity humidity = new Humidity();
+        final Measure measure = new Measure();
         if (fields.length != NUMBER_FIELDS_OF_LINE_FOR_HUMIDITY_MEASURE) {
             final String message = String.format(
                 "The line [%s] is not a valid line for humidity measure. Expected number of fields was %d, actual number is %d",
                 line, NUMBER_FIELDS_OF_LINE_FOR_HUMIDITY_MEASURE, fields.length);
             throw new ImporterException(message);
         }
-        humidity.setValue(parseValue(fields[1], line));
+        measure.setType(MeasureType.H);
+        measure.setValue(parseValue(fields[1], line));
 
-        return humidity;
+        return measure;
     }
 
     private int parseNumberOfMeasures(final String field, final String stationName) throws ImporterException {
