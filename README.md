@@ -6,13 +6,13 @@ This program must be launched with Java 8.
 
 ## To build the project, run the following commands:
 
-cd PROJECT_DIR
+cd PROJECT_DIR\mshpoa-importer
 
 mvn clean install
 
 ## To execute the program, run the following commands:
 
-cd PROJECT_DIR\target
+cd PROJECT_DIR\mshpoa-importer\target
 
 java -jar mshpoa-importer-1.0-SNAPSHOT.jar <list of file paths to process in the arguments...>
 
