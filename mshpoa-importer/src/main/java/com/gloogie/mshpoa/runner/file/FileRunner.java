@@ -5,9 +5,11 @@ import com.gloogie.mshpoa.model.MeasureField;
 import com.gloogie.mshpoa.model.MeasureType;
 import com.gloogie.mshpoa.model.WeatherStation;
 import com.gloogie.mshpoa.report.Reporter;
+import com.gloogie.mshpoa.report.StatsComputer;
 import com.gloogie.mshpoa.runner.file.exception.FileRunnerException;
 import com.gloogie.mshpoa.writer.Writer;
 import com.gloogie.mshpoa.writer.impl.ConsoleWriter;
+import org.apache.commons.lang3.Validate;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,35 +31,38 @@ public class FileRunner
 
     public static void main(final String[] args) {
 
+        boolean success = true;
+
         try {
             final FileImporter fileImporter = buildFileImporter();
             final Writer writer = new ConsoleWriter();
 
-            final File file = new File(
-                "C:\\Data\\src\\GitHub\\mshpoa\\mshpoa-importer\\src\\test\\resources\\test_ok.txt");
+            Validate.isTrue(args.length >= 1, "A not empty list of file paths should be passed in the arguments");
 
-            final List<WeatherStation> stations = fileImporter.consume(file);
-            final Reporter reporter = new Reporter(stations);
-
-            writer.write("=====================================================");
-            writer.write("FILE REPORT");
-            writer.write("=====================================================");
-            writer.write("Number of weather stations: " + reporter.getNumberOfWeatherStations());
-            writer.write("Number of failed measures: " + reporter.getNumberOfSensorsInError());
-
-            for (final MeasureType type : fileImporter.getMeasureTypes()) {
-                writer.write("=====================================================");
-                writer.write("Measures of type " + type.getName() + ":");
-                writer.write("Min value: " + reporter.getMinValue(type.getCode()));
-                writer.write("Max value: " + reporter.getMaxValue(type.getCode()));
-                writer.write("Mean value: " + reporter.getMeanValue(type.getCode()));
+            for (final String arg : args) {
+                success = processFile(fileImporter, writer, arg) && success;
             }
-
-            System.exit(0);
 
         } catch (final Exception e) {
             e.printStackTrace();
-            System.exit(1);
+            success = false;
+        }
+
+        System.exit(success ? 0 : 1);
+    }
+
+    private static boolean processFile(final FileImporter fileImporter, final Writer writer, final String filePath) {
+        try {
+            final File file = new File(filePath);
+            final List<WeatherStation> stations = fileImporter.consume(file);
+            final StatsComputer statsComputer = new StatsComputer(fileImporter.getMeasureTypes(), stations);
+            final Reporter reporter = new Reporter(statsComputer, writer);
+            reporter.writeReport(file.getName());
+            return true;
+        } catch (final Exception e) {
+            System.out.printf("An error occurred while processing the file %s%n", filePath);
+            e.printStackTrace();
+            return false;
         }
     }
 

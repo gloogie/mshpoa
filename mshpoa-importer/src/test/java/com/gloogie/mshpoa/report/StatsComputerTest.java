@@ -13,12 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Test class for Reporter
+ * Test class for StatsComputer
  */
-public class ReporterTest
+public class StatsComputerTest
 {
+    private List<MeasureType> types;
     private List<WeatherStation> stations;
-    private Reporter reporter;
+    private StatsComputer statsComputer;
 
     @Before
     public void setUp() throws Exception {
@@ -35,6 +36,11 @@ public class ReporterTest
         final MeasureType typeH = new MeasureType();
         typeH.setCode("H");
         typeH.setName("humidity");
+
+        types = new ArrayList<>();
+        types.add(typeT);
+        types.add(typeP);
+        types.add(typeH);
 
         final WeatherStation station1 = new WeatherStation();
         station1.setName("station1");
@@ -100,7 +106,7 @@ public class ReporterTest
         stations.add(station1);
         stations.add(station2);
 
-        reporter = new Reporter(stations);
+        statsComputer = new StatsComputer(types, stations);
     }
 
     @After
@@ -109,9 +115,19 @@ public class ReporterTest
     }
 
     @Test
+    public void testMeasureTypesNull() throws Exception {
+        try {
+            new StatsComputer(null, stations);
+            Assert.fail("Expected exception was not thrown");
+        } catch (final NullPointerException e) {
+            Assert.assertEquals("List of measure types cannot be null", e.getMessage());
+        }
+    }
+
+    @Test
     public void testStationsNull() throws Exception {
         try {
-            new Reporter(null);
+            new StatsComputer(types, null);
             Assert.fail("Expected exception was not thrown");
         } catch (final NullPointerException e) {
             Assert.assertEquals("List of stations cannot be null", e.getMessage());
@@ -120,37 +136,37 @@ public class ReporterTest
 
     @Test
     public void testGetNumberOfWeatherStationsEmpty() throws Exception {
-        Assert.assertEquals(0, new Reporter(new ArrayList<>()).getNumberOfWeatherStations());
+        Assert.assertEquals(0, new StatsComputer(types, new ArrayList<>()).getNumberOfWeatherStations());
     }
 
     @Test
     public void testGetNumberOfWeatherStations() throws Exception {
-        Assert.assertEquals(2, reporter.getNumberOfWeatherStations());
+        Assert.assertEquals(2, statsComputer.getNumberOfWeatherStations());
     }
 
     @Test
     public void testGetNumberOfSensorsInError() throws Exception {
-        Assert.assertEquals(1, reporter.getNumberOfSensorsInError());
+        Assert.assertEquals(1, statsComputer.getNumberOfSensorsInError());
     }
 
     @Test
     public void testGetMinValue() throws Exception {
-        Assert.assertEquals(20.5, reporter.getMinValue("T"), 0.001);
-        Assert.assertEquals(1010.0, reporter.getMinValue("P"), 0.001);
-        Assert.assertEquals(30.0, reporter.getMinValue("H"), 0.001);
+        Assert.assertEquals(20.5, statsComputer.getMinValue("T"), 0.001);
+        Assert.assertEquals(1010.0, statsComputer.getMinValue("P"), 0.001);
+        Assert.assertEquals(30.0, statsComputer.getMinValue("H"), 0.001);
     }
 
     @Test
     public void testGetMaxValue() throws Exception {
-        Assert.assertEquals(35.0, reporter.getMaxValue("T"), 0.001);
-        Assert.assertEquals(1015.0, reporter.getMaxValue("P"), 0.001);
-        Assert.assertEquals(70.0, reporter.getMaxValue("H"), 0.001);
+        Assert.assertEquals(35.0, statsComputer.getMaxValue("T"), 0.001);
+        Assert.assertEquals(1015.0, statsComputer.getMaxValue("P"), 0.001);
+        Assert.assertEquals(70.0, statsComputer.getMaxValue("H"), 0.001);
     }
 
     @Test
     public void testGetMeanValue() throws Exception {
-        Assert.assertEquals(28.5, reporter.getMeanValue("T"), 0.001);
-        Assert.assertEquals(1013.0, reporter.getMeanValue("P"), 0.001);
-        Assert.assertEquals(50.0, reporter.getMeanValue("H"), 0.001);
+        Assert.assertEquals(28.5, statsComputer.getMeanValue("T"), 0.001);
+        Assert.assertEquals(1013.0, statsComputer.getMeanValue("P"), 0.001);
+        Assert.assertEquals(50.0, statsComputer.getMeanValue("H"), 0.001);
     }
 }
